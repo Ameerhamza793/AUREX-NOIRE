@@ -59,6 +59,11 @@ app.use((req, res, next) => {
   next();
 });
 
+// Health check endpoint — keeps the server alive and lets uptime monitors ping it
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
 (async () => {
   await registerRoutes(httpServer, app);
 
@@ -93,6 +98,24 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+
+      // Keep-alive self-ping every 4 minutes in production to prevent sleeping
+      if (process.env.NODE_ENV === "production") {
+        const appUrl = process.env.REPLIT_DOMAINS
+          ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/health`
+          : `http://localhost:${port}/api/health`;
+
+        setInterval(() => {
+          const client = appUrl.startsWith("https") ? require("https") : require("http");
+          client.get(appUrl, (res: any) => {
+            log(`Keep-alive ping → ${res.statusCode}`, "keep-alive");
+          }).on("error", (err: any) => {
+            log(`Keep-alive ping failed: ${err.message}`, "keep-alive");
+          });
+        }, 4 * 60 * 1000); // every 4 minutes
+
+        log("Keep-alive ping started", "keep-alive");
+      }
     },
   );
 })();
