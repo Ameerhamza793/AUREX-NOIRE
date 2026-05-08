@@ -12,6 +12,31 @@ declare module "http" {
   }
 }
 
+// CORS — allow Vercel frontend and any localhost dev port
+const ALLOWED_ORIGINS = [
+  /^https:\/\/.*\.vercel\.app$/,
+  /^https:\/\/aurexnoire\.com$/,
+  /^https:\/\/www\.aurexnoire\.com$/,
+  /^http:\/\/localhost(:\d+)?$/,
+  /^https:\/\/.*\.replit\.app$/,
+  /^https:\/\/.*\.repl\.co$/,
+];
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin || "";
+  const allowed = ALLOWED_ORIGINS.some((pattern) => pattern.test(origin));
+  if (allowed) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  }
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -29,7 +54,6 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
@@ -51,7 +75,6 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
-
       log(logLine);
     }
   });
@@ -59,7 +82,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint — keeps the server alive and lets uptime monitors ping it
+// Health check — keeps the server alive
 app.get("/api/health", (_req: Request, res: Response) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
@@ -70,14 +93,10 @@ app.get("/api/health", (_req: Request, res: Response) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -85,21 +104,13 @@ app.get("/api/health", (_req: Request, res: Response) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
   httpServer.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
+    { port, host: "0.0.0.0", reusePort: true },
     () => {
       log(`serving on port ${port}`);
 
-      // Keep-alive self-ping every 4 minutes in production to prevent sleeping
+      // Keep-alive self-ping every 4 minutes in production
       if (process.env.NODE_ENV === "production") {
         const appUrl = process.env.REPLIT_DOMAINS
           ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/health`
@@ -112,7 +123,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
           }).on("error", (err: any) => {
             log(`Keep-alive ping failed: ${err.message}`, "keep-alive");
           });
-        }, 4 * 60 * 1000); // every 4 minutes
+        }, 4 * 60 * 1000);
 
         log("Keep-alive ping started", "keep-alive");
       }
