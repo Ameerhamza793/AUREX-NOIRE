@@ -7,9 +7,6 @@ import { useCart } from "@/hooks/use-cart";
 import { useLocation } from "wouter";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { API_BASE } from "@/lib/queryClient";
-
-const WHATSAPP_NUMBER = "923032811539";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
@@ -23,23 +20,6 @@ const checkoutSchema = z.object({
 });
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
-
-function buildWhatsAppMessage(data: CheckoutForm, items: any[], total: number): string {
-  const itemLines = items
-    .map((i) => `  • ${i.name} x${i.quantity} — ${i.price} PKR`)
-    .join("\n");
-
-  return (
-    `🛍️ *NEW ORDER — AUREX NOIRE*\n\n` +
-    `👤 *Customer:* ${data.customerName}\n` +
-    `📞 *Phone:* ${data.customerPhone}\n` +
-    `📧 *Email:* ${data.customerEmail}\n` +
-    `📍 *Address:* ${data.customerAddress}, ${data.customerCity}\n` +
-    `💳 *Payment:* ${data.paymentMethod === "COD" ? "Cash on Delivery" : "Online Payment"}\n\n` +
-    `📦 *Items:*\n${itemLines}\n\n` +
-    `💰 *Total: ${total.toFixed(2)} PKR*`
-  );
-}
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -59,39 +39,44 @@ export default function Checkout() {
   const onSubmit = async (data: CheckoutForm) => {
     setIsSubmitting(true);
 
-    // Build WhatsApp message
-    const waMessage = buildWhatsAppMessage(data, items, total);
+    const orderPayload = {
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone,
+      customerAddress: data.customerAddress,
+      customerCity: data.customerCity,
+      customerPostalCode: "N/A",
+      paymentMethod: data.paymentMethod,
+      totalAmount: total.toString(),
+      items: items.map((item) => ({
+        productId: typeof item.id === "string" ? parseInt(item.id) || 0 : item.id,
+        quantity: item.quantity,
+        price: item.price?.toString() ?? "0",
+        name: item.name,
+        imageUrl: item.imageUrl ?? "",
+      })),
+    };
 
-    // Fire-and-forget: try to save order to backend (never blocks or errors)
-    if (API_BASE) {
-      fetch(`${API_BASE}/api/orders`, {
+    // Fire all notifications silently — none of these block success
+    const apiBase = import.meta.env.VITE_API_URL || "";
+
+    // 1. Vercel serverless email function (works on Vercel without any setup)
+    fetch("/api/send-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderPayload),
+    }).catch(() => {});
+
+    // 2. Replit backend (works when VITE_API_URL is set)
+    if (apiBase) {
+      fetch(`${apiBase}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: data.customerName,
-          customerEmail: data.customerEmail,
-          customerPhone: data.customerPhone,
-          customerAddress: data.customerAddress,
-          customerCity: data.customerCity,
-          customerPostalCode: "N/A",
-          paymentMethod: data.paymentMethod,
-          totalAmount: total.toString(),
-          items: items.map((item) => ({
-            productId: typeof item.id === "string" ? parseInt(item.id) || 0 : item.id,
-            quantity: item.quantity,
-            price: item.price?.toString() ?? "0",
-            name: item.name,
-            imageUrl: item.imageUrl ?? "",
-          })),
-        }),
+        body: JSON.stringify(orderPayload),
       }).catch(() => {});
     }
 
-    // Open WhatsApp with order details
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
-    window.open(waUrl, "_blank");
-
-    // Clear cart and go to confirmation — ALWAYS
+    // Always clear cart and show confirmation — no errors shown to customer
     clearCart();
     setIsSubmitting(false);
     setLocation("/order-confirmation");
@@ -176,13 +161,13 @@ export default function Checkout() {
               <div className="space-y-4 pt-4">
                 <label className="text-sm text-muted-foreground uppercase tracking-wide block">Payment Method</label>
                 <div className="flex gap-4">
-                  <label className={`flex-1 flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${form.watch("paymentMethod") === "COD" ? "border-primary bg-primary/5" : "border-white/10"}`}>
+                  <label className={`flex-1 flex items-center p-4 border rounded-lg cursor-pointer transition-all ${form.watch("paymentMethod") === "COD" ? "border-primary bg-primary/5" : "border-white/10"}`}>
                     <div className="flex items-center gap-3">
                       <input type="radio" value="COD" {...form.register("paymentMethod")} className="accent-primary" />
                       <span className="text-white text-sm">Cash on Delivery</span>
                     </div>
                   </label>
-                  <label className={`flex-1 flex items-center justify-between p-4 border rounded-lg cursor-pointer transition-all ${form.watch("paymentMethod") === "Online" ? "border-primary bg-primary/5" : "border-white/10"}`}>
+                  <label className={`flex-1 flex items-center p-4 border rounded-lg cursor-pointer transition-all ${form.watch("paymentMethod") === "Online" ? "border-primary bg-primary/5" : "border-white/10"}`}>
                     <div className="flex items-center gap-3">
                       <input type="radio" value="Online" {...form.register("paymentMethod")} className="accent-primary" />
                       <span className="text-white text-sm">Online Payment</span>
@@ -195,19 +180,16 @@ export default function Checkout() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
+                  data-testid="button-place-order"
                   className="w-full bg-white text-black py-4 uppercase tracking-[0.2em] font-bold hover:bg-primary transition-all duration-500 shadow-xl hover:shadow-primary/20 flex justify-center items-center gap-2 rounded-lg"
                 >
-                  {isSubmitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    "Place Order ✅"
-                  )}
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : "Place Order"}
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Order Preview */}
+          {/* Order Summary */}
           <div className="bg-card p-8 border border-white/5 h-fit">
             <h2 className="text-xl text-white mb-6">Your Order</h2>
             <div className="space-y-4 mb-8 max-h-96 overflow-y-auto pr-2">
