@@ -4,13 +4,13 @@ import { z } from "zod";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useCart } from "@/hooks/use-cart";
-import { useCreateOrder } from "@/hooks/use-orders";
 import { useLocation } from "wouter";
-import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import { API_BASE } from "@/lib/queryClient";
 
-// Schema for the checkout form
+const WHATSAPP_NUMBER = "923032811539";
+
 const checkoutSchema = z.object({
   customerName: z.string().min(2, "Name is required"),
   customerEmail: z.string().email("Invalid email address"),
@@ -24,17 +24,31 @@ const checkoutSchema = z.object({
 
 type CheckoutForm = z.infer<typeof checkoutSchema>;
 
+function buildWhatsAppMessage(data: CheckoutForm, items: any[], total: number): string {
+  const itemLines = items
+    .map((i) => `  • ${i.name} x${i.quantity} — ${i.price} PKR`)
+    .join("\n");
+
+  return (
+    `🛍️ *NEW ORDER — AUREX NOIRE*\n\n` +
+    `👤 *Customer:* ${data.customerName}\n` +
+    `📞 *Phone:* ${data.customerPhone}\n` +
+    `📧 *Email:* ${data.customerEmail}\n` +
+    `📍 *Address:* ${data.customerAddress}, ${data.customerCity}\n` +
+    `💳 *Payment:* ${data.paymentMethod === "COD" ? "Cash on Delivery" : "Online Payment"}\n\n` +
+    `📦 *Items:*\n${itemLines}\n\n` +
+    `💰 *Total: ${total.toFixed(2)} PKR*`
+  );
+}
+
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
-  const { mutate: createOrder, isPending } = useCreateOrder();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CheckoutForm>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: {
-      paymentMethod: "COD",
-    },
+    defaultValues: { paymentMethod: "COD" },
   });
 
   if (items.length === 0) {
@@ -42,61 +56,54 @@ export default function Checkout() {
     return null;
   }
 
-  const onSubmit = (data: CheckoutForm) => {
-    createOrder(
-      {
-        ...data,
-        customerPostalCode: "N/A",
-        totalAmount: total.toString(),
-        items: items.map((item) => ({
-          productId: typeof item.id === 'string' ? parseInt(item.id) || 0 : item.id,
-          quantity: item.quantity,
-          price: item.price?.toString() ?? "0",
-          name: item.name,
-          imageUrl: item.imageUrl ?? "",
-        })),
-      },
-      {
-        onSuccess: async (order) => {
-          // Try to save to Supabase for admin panel — never block the order flow
-          try {
-            await supabase.from("orders").insert([{
-              order_id: order?.id ?? null,
-              customer_name: data.customerName,
-              customer_email: data.customerEmail,
-              customer_phone: data.customerPhone,
-              customer_address: data.customerAddress,
-              customer_city: data.customerCity,
-              payment_method: data.paymentMethod,
-              total_amount: total.toString(),
-              items: JSON.stringify(items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price }))),
-              status: "pending",
-            }]);
-          } catch {
-            // Supabase table may not exist yet — order still succeeds
-          }
-          clearCart();
-          setLocation("/order-confirmation");
-        },
-        onError: (error: any) => {
-          console.error("[Checkout] Order failed:", error?.message ?? error);
-          toast({
-            title: "Error",
-            description: "Something went wrong processing your order. Please try again.",
-            variant: "destructive",
-          });
-        },
-      }
-    );
+  const onSubmit = async (data: CheckoutForm) => {
+    setIsSubmitting(true);
+
+    // Build WhatsApp message
+    const waMessage = buildWhatsAppMessage(data, items, total);
+
+    // Fire-and-forget: try to save order to backend (never blocks or errors)
+    if (API_BASE) {
+      fetch(`${API_BASE}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: data.customerName,
+          customerEmail: data.customerEmail,
+          customerPhone: data.customerPhone,
+          customerAddress: data.customerAddress,
+          customerCity: data.customerCity,
+          customerPostalCode: "N/A",
+          paymentMethod: data.paymentMethod,
+          totalAmount: total.toString(),
+          items: items.map((item) => ({
+            productId: typeof item.id === "string" ? parseInt(item.id) || 0 : item.id,
+            quantity: item.quantity,
+            price: item.price?.toString() ?? "0",
+            name: item.name,
+            imageUrl: item.imageUrl ?? "",
+          })),
+        }),
+      }).catch(() => {});
+    }
+
+    // Open WhatsApp with order details
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+    window.open(waUrl, "_blank");
+
+    // Clear cart and go to confirmation — ALWAYS
+    clearCart();
+    setIsSubmitting(false);
+    setLocation("/order-confirmation");
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <div className="pt-32 pb-24 px-4 max-w-7xl mx-auto">
         <h1 className="font-display text-4xl text-white mb-12 text-center">Checkout</h1>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
           {/* Form */}
           <div>
@@ -187,10 +194,10 @@ export default function Checkout() {
               <div className="pt-8">
                 <button
                   type="submit"
-                  disabled={isPending}
+                  disabled={isSubmitting}
                   className="w-full bg-white text-black py-4 uppercase tracking-[0.2em] font-bold hover:bg-primary transition-all duration-500 shadow-xl hover:shadow-primary/20 flex justify-center items-center gap-2 rounded-lg"
                 >
-                  {isPending ? (
+                  {isSubmitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     "Place Order ✅"
@@ -215,20 +222,20 @@ export default function Checkout() {
                 </div>
               ))}
             </div>
-            
+
             <div className="pt-6 border-t border-white/10 space-y-2">
-               <div className="flex justify-between text-muted-foreground text-sm">
-                  <span>Subtotal</span>
-                  <span>{total.toFixed(2)} PKR</span>
-                </div>
-                <div className="flex justify-between text-muted-foreground text-sm">
-                  <span>Shipping</span>
-                  <span>0.00 PKR</span>
-                </div>
-                <div className="flex justify-between text-white text-lg font-medium pt-2">
-                  <span>Total</span>
-                  <span>{total.toFixed(2)} PKR</span>
-                </div>
+              <div className="flex justify-between text-muted-foreground text-sm">
+                <span>Subtotal</span>
+                <span>{total.toFixed(2)} PKR</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground text-sm">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
+              <div className="flex justify-between text-white text-lg font-medium pt-2">
+                <span>Total</span>
+                <span>{total.toFixed(2)} PKR</span>
+              </div>
             </div>
           </div>
         </div>
