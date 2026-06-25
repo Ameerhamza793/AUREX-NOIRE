@@ -57,26 +57,41 @@ export default function Checkout() {
       })),
     };
 
-    // Fire all notifications silently — none of these block success
     const apiBase = import.meta.env.VITE_API_URL || "";
 
-    // 1. Vercel serverless email function (works on Vercel without any setup)
+    // 1. Vercel serverless function — sends email directly from Vercel
     fetch("/api/send-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(orderPayload),
-    }).catch(() => {});
+    })
+      .then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        if (r.ok && json.success) {
+          console.log("[Checkout] ✅ Email sent via Vercel function. MessageId:", json.messageId);
+        } else {
+          console.error("[Checkout] ❌ Vercel email function failed:", r.status, json);
+        }
+      })
+      .catch((err) => console.error("[Checkout] ❌ Vercel email fetch error:", err));
 
-    // 2. Replit backend (works when VITE_API_URL is set)
+    // 2. Replit backend — saves order to DB and sends email (when VITE_API_URL is set)
     if (apiBase) {
       fetch(`${apiBase}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderPayload),
-      }).catch(() => {});
+      })
+        .then(async (r) => {
+          const json = await r.json().catch(() => ({}));
+          console.log("[Checkout] Replit backend response:", r.status, json?.id ? `Order #${json.id}` : json);
+        })
+        .catch((err) => console.error("[Checkout] Replit backend error:", err));
+    } else {
+      console.warn("[Checkout] VITE_API_URL not set — skipping Replit backend. Set it in Vercel env vars.");
     }
 
-    // Always clear cart and show confirmation — no errors shown to customer
+    // Always clear cart and go to confirmation — customer never sees an error
     clearCart();
     setIsSubmitting(false);
     setLocation("/order-confirmation");
