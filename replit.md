@@ -2,7 +2,7 @@
 
 ## Overview
 
-Aurex Noire is a luxury e-commerce platform for high-end watches and accessories. The application features a React frontend with a dark, premium aesthetic, an Express.js backend API, and PostgreSQL database for data persistence. The platform supports product browsing, shopping cart functionality, wishlists, order placement, and contact form submissions.
+Aurex Noire is a luxury e-commerce platform for high-end watches and accessories. The application features a React frontend with a dark, premium aesthetic, an Express.js backend API, and PostgreSQL[...]
 
 ## User Preferences
 
@@ -119,3 +119,4 @@ Key endpoints:
 - **Vite**: Frontend build tool with HMR
 - **esbuild**: Server bundling for production
 - **tsx**: TypeScript execution for development
+- **Email Service**: Gmail SMTP integration for contact form notifications (configured via GMAIL_USER and GMAIL_APP_PASSWORD)
