@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { ShoppingBag, Heart, Search, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, Heart, Watch } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useCart } from "@/hooks/use-cart";
 import { useWishlist } from "@/hooks/use-wishlist";
@@ -14,108 +14,90 @@ export function Navbar() {
   const wishlistCount = useWishlist((state) => state.items.length);
 
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const links = [
     { href: "/", label: "Home" },
-    { href: "/shop", label: "Shop" },
-    { href: "/shop?cat=watches", label: "Collections" },
-    { href: "/contact", label: "About" },
-    { href: "/contact", label: "Contact" },
+    { href: "/shop", label: "Blog" },
+    { href: "/contact", label: "About us" },
   ];
 
   return (
-    <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-400 ${
-        isScrolled
-          ? "bg-[#0A0A0A]/95 backdrop-blur-md border-b border-[#2A2A2A] py-3"
-          : "bg-[#0A0A0A] border-b border-[#2A2A2A] py-4"
-      }`}
-    >
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between">
+    <nav className={`fixed top-0 w-full z-50 transition-all duration-500 ${isScrolled ? "bg-background/90 backdrop-blur-md py-4 border-b border-white/5" : "bg-transparent py-8"}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-full">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <span
-              className="font-display text-xl sm:text-2xl font-bold tracking-[4px] text-[#C9A84C] uppercase hover:text-[#E8C97A] transition-colors duration-300"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          <Link href="/" className="flex flex-col items-center group">
+            <div className="flex items-center gap-2">
+              <Watch className="w-6 h-6 text-primary group-hover:rotate-45 transition-transform duration-500" />
+              <span className="font-display text-2xl font-bold tracking-[0.2em] text-white uppercase transition-colors group-hover:text-primary">
+                AUREX NOIRE
+              </span>
+            </div>
+            <motion.span 
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                duration: 1.5, 
+                repeat: Infinity, 
+                repeatType: "reverse",
+                ease: "easeInOut"
+              }}
+              className="text-[8px] tracking-[0.4em] text-primary/80 uppercase font-medium"
             >
-              AUREX NOIRE
-            </span>
+              Feel the Premiumness
+            </motion.span>
           </Link>
 
-          {/* Center Nav Links — desktop */}
-          <div className="hidden lg:flex items-center gap-8">
+          {/* Desktop Links */}
+          <div className="hidden lg:flex items-center space-x-12">
             {links.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}
-                className={`text-[11px] tracking-[2px] uppercase font-medium transition-colors duration-300 relative group ${
-                  location === link.href
-                    ? "text-[#C9A84C]"
-                    : "text-[#888] hover:text-[#F5F5F0]"
+                className={`text-[10px] tracking-[0.2em] uppercase hover:text-primary transition-colors duration-300 relative group ${
+                  location === link.href ? "text-primary" : "text-white/70"
                 }`}
               >
                 {link.label}
-                <span
-                  className={`absolute -bottom-0.5 left-0 h-[1px] bg-[#C9A84C] transition-all duration-300 ${
-                    location === link.href ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
-                />
+                <span className={`absolute -bottom-1 left-0 w-0 h-[1px] bg-primary transition-all duration-300 group-hover:w-full ${location === link.href ? "w-full" : ""}`} />
               </Link>
             ))}
           </div>
 
-          {/* Right Icons */}
-          <div className="flex items-center gap-4 sm:gap-5">
-            <button
-              className="text-[#888] hover:text-[#F5F5F0] transition-colors hidden sm:block"
-              aria-label="Search"
-              data-testid="button-search"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            <Link
-              href="/wishlist"
-              className="relative text-[#888] hover:text-[#F5F5F0] transition-colors hidden sm:block"
-              data-testid="link-wishlist-nav"
-            >
-              <Heart
-                className={`w-5 h-5 ${wishlistCount > 0 ? "fill-[#C9A84C] text-[#C9A84C]" : ""}`}
-              />
+          {/* Icons */}
+          <div className="flex items-center space-x-6">
+            <Link href="/wishlist" className="relative text-white/80 hover:text-red-400 transition-colors hidden md:block">
+              <Heart className={`w-5 h-5 ${wishlistCount > 0 ? "fill-red-400 text-red-400" : ""}`} />
               {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#C9A84C] text-[#0A0A0A] text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {wishlistCount}
                 </span>
               )}
             </Link>
-
-            <Link
-              href="/cart"
-              className="relative text-[#888] hover:text-[#F5F5F0] transition-colors"
-              data-testid="link-cart-nav"
-            >
-              <ShoppingBag
-                className={`w-5 h-5 ${cartCount > 0 ? "text-[#C9A84C]" : ""}`}
-              />
+            <Link href="/cart" className="relative text-white/80 hover:text-primary transition-colors">
+              <ShoppingBag className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#C9A84C] text-[#0A0A0A] text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                <span className="absolute -top-2 -right-2 bg-primary text-background text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {cartCount}
                 </span>
               )}
             </Link>
-
-            {/* Hamburger */}
+            
+            <button className="bg-white text-black px-6 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-primary transition-colors hidden md:block">
+              Login
+            </button>
+            
             <button
-              className="lg:hidden text-[#888] hover:text-white transition-colors"
+              className="lg:hidden text-white/80"
               onClick={() => setIsOpen(!isOpen)}
-              data-testid="button-mobile-menu"
             >
-              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
@@ -128,33 +110,35 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="lg:hidden bg-[#0f0f0f] border-t border-[#2A2A2A]"
+            className="lg:hidden bg-card border-b border-white/10"
           >
-            <div className="max-w-[1280px] mx-auto px-6 py-6 flex flex-col gap-5">
+            <div className="px-4 py-8 space-y-6 flex flex-col items-center">
               {links.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
                   onClick={() => setIsOpen(false)}
-                  className={`text-[11px] tracking-[3px] uppercase font-medium ${
-                    location === link.href ? "text-[#C9A84C]" : "text-[#888]"
+                  className={`text-xs tracking-widest uppercase ${
+                    location === link.href ? "text-primary" : "text-white/80"
                   }`}
-                  data-testid={`link-mobile-${link.label.toLowerCase()}`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex items-center gap-6 pt-2 border-t border-[#2A2A2A]">
-                <Link
-                  href="/wishlist"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-[11px] tracking-[2px] uppercase text-[#888]"
-                >
-                  <Heart className={`w-4 h-4 ${wishlistCount > 0 ? "fill-[#C9A84C] text-[#C9A84C]" : ""}`} />
-                  Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
-                </Link>
-              </div>
+              <Link
+                href="/wishlist"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2 text-xs tracking-widest uppercase text-white/80 hover:text-red-400 transition-colors"
+              >
+                <Heart className={`w-4 h-4 ${wishlistCount > 0 ? "fill-red-400 text-red-400" : ""}`} />
+                Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
+              </Link>
+              <button 
+                className="w-full bg-white text-black py-3 rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Login
+              </button>
             </div>
           </motion.div>
         )}
