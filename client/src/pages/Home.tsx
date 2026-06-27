@@ -8,20 +8,13 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, type CSSProperties } from "react";
 
-// Item slot widths (circle + gap)
-const MOBILE_ITEM_W = 164; // 140px circle + 24px gap
-const DESKTOP_ITEM_W = 260; // 220px circle + 40px gap
-
 function CategoryCarousel() {
   const [paused, setPaused] = useState(false);
   const { data: categories = [], isLoading } = useCategories();
 
-  // 4× duplication for seamless infinite loop on any screen width
-  const items = [...categories, ...categories, ...categories, ...categories];
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-[200px]">
+      <div className="flex justify-center items-center h-[180px]">
         <Loader2 className="w-5 h-5 text-primary animate-spin" />
       </div>
     );
@@ -29,73 +22,85 @@ function CategoryCarousel() {
 
   if (categories.length === 0) return null;
 
-  const speed = 65;
-  const mobileDur = (categories.length * MOBILE_ITEM_W) / speed;
-  const desktopDur = (categories.length * DESKTOP_ITEM_W) / speed;
+  // 2× duplication — the -50% keyframe moves exactly one full set
+  const track = [...categories, ...categories];
 
-  const trackStyle = (itemW: number, dur: number): CSSProperties => ({
+  const anim = (dur: number): CSSProperties => ({
+    display: "flex",
+    width: "max-content",
     animation: `cat-scroll ${dur}s linear infinite`,
     animationPlayState: paused ? "paused" : "running",
-    width: `${itemW * items.length}px`,
-    display: "flex",
-    alignItems: "center",
-    gap: 0,
-    flexShrink: 0,
   });
-
-  const CircleItem = ({ cat, mobile }: { cat: any; mobile: boolean }) => (
-    <div
-      className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
-      style={{ width: mobile ? MOBILE_ITEM_W : DESKTOP_ITEM_W, gap: mobile ? 10 : 14 }}
-      onClick={() => { window.location.href = cat.path || "/shop"; }}
-    >
-      <div
-        className="rounded-full overflow-hidden transition-all duration-500 group-hover:scale-105"
-        style={{
-          width: mobile ? 140 : 220,
-          height: mobile ? 140 : 220,
-          padding: "2px",
-          background: "linear-gradient(135deg, #D4AF37 0%, #f5e09a 50%, #D4AF37 100%)",
-          boxShadow: "0 0 16px rgba(212,175,55,0.4), 0 0 32px rgba(212,175,55,0.15)",
-        }}
-      >
-        <div className="w-full h-full rounded-full overflow-hidden">
-          <img
-            src={cat.image}
-            alt={cat.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        </div>
-      </div>
-      <span
-        className="text-white uppercase font-bold tracking-[0.18em] whitespace-nowrap font-display transition-colors duration-300 group-hover:text-[#D4AF37]"
-        style={{ fontSize: mobile ? 9 : 11 }}
-      >
-        {cat.name}
-      </span>
-    </div>
-  );
 
   return (
     <div
-      className="w-full overflow-hidden py-2"
+      className="w-full overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Mobile */}
-      <div className="flex md:hidden">
-        <div style={trackStyle(MOBILE_ITEM_W, mobileDur)}>
-          {items.map((cat, i) => (
-            <CircleItem key={`m-${i}`} cat={cat} mobile={true} />
+      {/* Mobile — 120px circles, 28px gap */}
+      <div className="flex md:hidden py-4">
+        <div style={anim(12)}>
+          {track.map((cat, i) => (
+            <div
+              key={`m-${i}`}
+              className="flex-shrink-0 flex flex-col items-center cursor-pointer"
+              style={{ paddingLeft: 14, paddingRight: 14, gap: 10 }}
+              onClick={() => { window.location.href = cat.path || "/shop"; }}
+            >
+              <div style={{
+                width: 120, height: 120, borderRadius: "50%", flexShrink: 0,
+                padding: 2,
+                background: "linear-gradient(135deg,#D4AF37 0%,#f5e09a 50%,#D4AF37 100%)",
+                boxShadow: "0 0 14px rgba(212,175,55,0.45)",
+              }}>
+                <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
+                  <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                </div>
+              </div>
+              <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#fff", fontWeight: 700, textTransform: "uppercase", whiteSpace: "nowrap" }}>
+                {cat.name}
+              </span>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Desktop */}
-      <div className="hidden md:flex">
-        <div style={trackStyle(DESKTOP_ITEM_W, desktopDur)}>
-          {items.map((cat, i) => (
-            <CircleItem key={`d-${i}`} cat={cat} mobile={false} />
+      {/* Desktop — 200px circles, 48px gap */}
+      <div className="hidden md:flex py-6">
+        <div style={anim(18)}>
+          {track.map((cat, i) => (
+            <div
+              key={`d-${i}`}
+              className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
+              style={{ paddingLeft: 24, paddingRight: 24, gap: 14 }}
+              onClick={() => { window.location.href = cat.path || "/shop"; }}
+            >
+              <div
+                className="transition-transform duration-500 group-hover:scale-105"
+                style={{
+                  width: 200, height: 200, borderRadius: "50%", flexShrink: 0,
+                  padding: 2.5,
+                  background: "linear-gradient(135deg,#D4AF37 0%,#f5e09a 50%,#D4AF37 100%)",
+                  boxShadow: "0 0 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.18)",
+                }}
+              >
+                <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="group-hover:scale-110 transition-transform duration-500"
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+              </div>
+              <span
+                className="group-hover:text-[#D4AF37] transition-colors duration-300"
+                style={{ fontSize: 11, letterSpacing: "0.18em", color: "#fff", fontWeight: 700, textTransform: "uppercase", whiteSpace: "nowrap" }}
+              >
+                {cat.name}
+              </span>
+            </div>
           ))}
         </div>
       </div>
