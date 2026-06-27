@@ -112,8 +112,8 @@
   display: none;
 }
 
-/* Category carousel infinite scroll */
+/* Category carousel infinite scroll — -50% works with 2× duplicate track */
 @keyframes cat-scroll {
   0%   { transform: translateX(0); }
-  100% { transform: translateX(-25%); }
+  100% { transform: translateX(-50%); }
 }
