@@ -6,52 +6,11 @@ import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 
-// Item slot widths (oval + gap)
-const MOBILE_ITEM_W = 120; // 96px oval + 24px gap
-const DESKTOP_ITEM_W = 200; // 160px oval + 40px gap
-
-function CategoryOval({ cat, size }: { cat: any; size: "sm" | "lg" }) {
-  const isLg = size === "lg";
-  return (
-    <div
-      className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
-      style={{ gap: isLg ? 14 : 10 }}
-      onClick={() => { window.location.href = cat.path || "/shop"; }}
-    >
-      {/* Gold-border oval frame */}
-      <div
-        className="relative overflow-hidden transition-all duration-500 group-hover:scale-105"
-        style={{
-          width: isLg ? 160 : 96,
-          height: isLg ? 220 : 132,
-          borderRadius: "50%",
-          border: "2.5px solid #D4AF37",
-          boxShadow: "0 0 18px rgba(212,175,55,0.55), 0 0 40px rgba(212,175,55,0.2), inset 0 0 20px rgba(6,18,40,0.6)",
-          background: "#061228",
-        }}
-      >
-        <img
-          src={cat.image}
-          alt={cat.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          style={{ objectPosition: "center" }}
-        />
-        {/* subtle inner vignette */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse at center, transparent 50%, rgba(6,18,40,0.35) 100%)"
-        }} />
-      </div>
-      <span
-        className="text-white uppercase font-bold tracking-[0.18em] whitespace-nowrap font-display transition-colors duration-300 group-hover:text-[#D4AF37]"
-        style={{ fontSize: isLg ? 11 : 8 }}
-      >
-        {cat.name}
-      </span>
-    </div>
-  );
-}
+// Item slot widths (circle + gap)
+const MOBILE_ITEM_W = 164; // 140px circle + 24px gap
+const DESKTOP_ITEM_W = 260; // 220px circle + 40px gap
 
 function CategoryCarousel() {
   const [paused, setPaused] = useState(false);
@@ -70,37 +29,73 @@ function CategoryCarousel() {
 
   if (categories.length === 0) return null;
 
-  // Duration: total set width / speed (px/s)
-  const speed = 55;
+  const speed = 65;
   const mobileDur = (categories.length * MOBILE_ITEM_W) / speed;
   const desktopDur = (categories.length * DESKTOP_ITEM_W) / speed;
 
-  const trackStyle = (itemW: number, dur: number) => ({
+  const trackStyle = (itemW: number, dur: number): CSSProperties => ({
     animation: `cat-scroll ${dur}s linear infinite`,
     animationPlayState: paused ? "paused" : "running",
     width: `${itemW * items.length}px`,
+    display: "flex",
+    alignItems: "center",
+    gap: 0,
+    flexShrink: 0,
   });
+
+  const CircleItem = ({ cat, mobile }: { cat: any; mobile: boolean }) => (
+    <div
+      className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
+      style={{ width: mobile ? MOBILE_ITEM_W : DESKTOP_ITEM_W, gap: mobile ? 10 : 14 }}
+      onClick={() => { window.location.href = cat.path || "/shop"; }}
+    >
+      <div
+        className="rounded-full overflow-hidden transition-all duration-500 group-hover:scale-105"
+        style={{
+          width: mobile ? 140 : 220,
+          height: mobile ? 140 : 220,
+          padding: "2px",
+          background: "linear-gradient(135deg, #D4AF37 0%, #f5e09a 50%, #D4AF37 100%)",
+          boxShadow: "0 0 16px rgba(212,175,55,0.4), 0 0 32px rgba(212,175,55,0.15)",
+        }}
+      >
+        <div className="w-full h-full rounded-full overflow-hidden">
+          <img
+            src={cat.image}
+            alt={cat.name}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+        </div>
+      </div>
+      <span
+        className="text-white uppercase font-bold tracking-[0.18em] whitespace-nowrap font-display transition-colors duration-300 group-hover:text-[#D4AF37]"
+        style={{ fontSize: mobile ? 9 : 11 }}
+      >
+        {cat.name}
+      </span>
+    </div>
+  );
 
   return (
     <div
-      className="w-full overflow-hidden py-4"
+      className="w-full overflow-hidden py-2"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* Mobile */}
       <div className="flex md:hidden">
-        <div className="flex items-end flex-shrink-0" style={{ ...trackStyle(MOBILE_ITEM_W, mobileDur), gap: 24 }}>
+        <div style={trackStyle(MOBILE_ITEM_W, mobileDur)}>
           {items.map((cat, i) => (
-            <CategoryOval key={`m-${i}`} cat={cat} size="sm" />
+            <CircleItem key={`m-${i}`} cat={cat} mobile={true} />
           ))}
         </div>
       </div>
 
       {/* Desktop */}
       <div className="hidden md:flex">
-        <div className="flex items-end flex-shrink-0" style={{ ...trackStyle(DESKTOP_ITEM_W, desktopDur), gap: 40 }}>
+        <div style={trackStyle(DESKTOP_ITEM_W, desktopDur)}>
           {items.map((cat, i) => (
-            <CategoryOval key={`d-${i}`} cat={cat} size="lg" />
+            <CircleItem key={`d-${i}`} cat={cat} mobile={false} />
           ))}
         </div>
       </div>
