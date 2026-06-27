@@ -31,7 +31,7 @@ const FALLBACK_CATEGORIES: Category[] = [
   {
     id: 4,
     name: "Headphones",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
+    image: "/headphones.jpg",
     path: "/shop?category=Headphones",
   },
 ];
