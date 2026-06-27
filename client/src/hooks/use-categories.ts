@@ -13,25 +13,25 @@ const FALLBACK_CATEGORIES: Category[] = [
   {
     id: 1,
     name: "Watches",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?q=80&w=600&auto=format&fit=crop",
     path: "/shop?category=Watches",
   },
   {
     id: 2,
     name: "Jewellery",
-    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=600&auto=format&fit=crop",
     path: "/shop?category=Jewellery",
   },
   {
     id: 3,
     name: "Hand Bags",
-    image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=400&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=600&auto=format&fit=crop",
     path: "/shop?category=Hand%20Bags",
   },
   {
     id: 4,
-    name: "Headphones 🎧",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop",
+    name: "Headphones",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop",
     path: "/shop?category=Headphones",
   },
 ];
