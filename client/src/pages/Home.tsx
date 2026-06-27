@@ -5,68 +5,19 @@ import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
 import { Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
 function CategoryCarousel() {
-  const [translateX, setTranslateX] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+  const [paused, setPaused] = useState(false);
   const { data: categories = [], isLoading } = useCategories();
 
-  // Create infinite loop by duplicating categories
-  const extendedCategories = [...categories, ...categories];
-  const itemWidthMobile = 170; // 150px circle + gap
-  const itemWidthDesktop = 280; // 240px circle + gap
-
-  useEffect(() => {
-    if (isHovered || categories.length === 0) return;
-
-    const timer = setInterval(() => {
-      setTranslateX((prev) => {
-        const nextValue = prev - itemWidthDesktop;
-        const maxScroll = categories.length * itemWidthDesktop;
-        return nextValue <= -maxScroll ? 0 : nextValue;
-      });
-    }, 2500);
-
-    return () => clearInterval(timer);
-  }, [isHovered, categories.length]);
-
-  const CategoryItem = ({ category, size = "desktop" }: { category: any; size?: "mobile" | "desktop" }) => {
-    const isMobile = size === "mobile";
-    const circleSize = isMobile ? "w-[150px] h-[150px]" : "w-[240px] h-[240px]";
-    const textSize = isMobile ? "text-[9px]" : "text-[11px] md:text-[12px]";
-    const gapSize = isMobile ? "gap-2" : "gap-3";
-    const borderWidth = isMobile ? "p-[0.5px]" : "p-[0.5px]";
-    const shadowSize = isMobile ? "shadow-[0_0_6px_rgba(212,175,55,0.05)]" : "shadow-[0_0_8px_rgba(212,175,55,0.08)]";
-
-    return (
-      <div
-        className={`flex flex-col items-center ${gapSize} cursor-pointer flex-shrink-0`}
-        onClick={() => window.location.href = category.path}
-      >
-        <div className={`${circleSize} flex-shrink-0`}>
-          <div className={`relative w-full h-full aspect-square rounded-full ${borderWidth} bg-gradient-to-tr from-[#D4AF37] via-transparent to-[#D4AF37] ${shadowSize}`}>
-            <div className="w-full h-full aspect-square rounded-full overflow-hidden border border-[#D4AF37]/5">
-              <img 
-                src={category.image} 
-                alt={category.name} 
-                className="w-full h-full object-cover aspect-square" 
-              />
-              <div className="absolute inset-0 bg-black/10" />
-            </div>
-          </div>
-        </div>
-        <h3 className={`text-white uppercase tracking-[0.15em] ${textSize} font-display font-bold whitespace-nowrap`}>
-          {category.name}
-        </h3>
-      </div>
-    );
-  };
+  // Duplicate 4× so the loop is seamless even on wide screens
+  const items = [...categories, ...categories, ...categories, ...categories];
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-[220px] md:h-[280px]">
+      <div className="flex justify-center items-center h-[200px]">
         <Loader2 className="w-6 h-6 text-primary animate-spin" />
       </div>
     );
@@ -74,50 +25,92 @@ function CategoryCarousel() {
 
   if (categories.length === 0) {
     return (
-      <div className="flex justify-center items-center h-[220px] md:h-[280px] text-muted-foreground">
+      <div className="flex justify-center items-center h-[200px] text-muted-foreground text-sm">
         No categories available
       </div>
     );
   }
 
+  // Each item width: mobile = 140px circle + 24px gap = 164px
+  //                 desktop = 200px circle + 40px gap = 240px
+  // Total width of ONE set = count × itemWidth
+  // We animate translateX from 0 → -(one set width) — then CSS resets to 0 seamlessly
+  const mobileItemW = 164;
+  const desktopItemW = 240;
+  const mobileSetW = categories.length * mobileItemW;
+  const desktopSetW = categories.length * desktopItemW;
+
+  // Speed: px per second — higher = faster
+  const speed = 80;
+  const mobileDuration = mobileSetW / speed;
+  const desktopDuration = desktopSetW / speed;
+
   return (
-    <>
-      {/* Mobile Carousel */}
-      <div 
-        className="flex md:hidden w-full overflow-hidden justify-center"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+    <div
+      className="w-full overflow-hidden"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* ── Mobile track ── */}
+      <div className="flex md:hidden">
         <div
-          className="flex gap-4 transition-transform duration-1000 ease-out"
-          style={{ transform: `translateX(${translateX * 0.85}px)` }}
+          className="flex gap-6 flex-shrink-0"
+          style={{
+            animation: `cat-scroll ${mobileDuration}s linear infinite`,
+            animationPlayState: paused ? "paused" : "running",
+            width: `${mobileItemW * items.length}px`,
+          }}
         >
-          {extendedCategories.map((category, i) => (
-            <div key={`mobile-${i}`} className="flex-shrink-0">
-              <CategoryItem category={category} size="mobile" />
+          {items.map((cat, i) => (
+            <div
+              key={`m-${i}`}
+              className="flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer"
+              style={{ width: `${mobileItemW - 24}px` }}
+              onClick={() => { window.location.href = cat.path || "/shop"; }}
+            >
+              <div className="w-[120px] h-[120px] rounded-full p-[1.5px] bg-gradient-to-tr from-[#D4AF37] via-transparent to-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.12)]">
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <span className="text-white text-[9px] uppercase tracking-[0.15em] font-bold whitespace-nowrap font-display">
+                {cat.name}
+              </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Desktop Carousel */}
-      <div 
-        className="hidden md:flex w-full overflow-hidden justify-center"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
+      {/* ── Desktop track ── */}
+      <div className="hidden md:flex">
         <div
-          className="flex gap-12 transition-transform duration-1000 ease-out"
-          style={{ transform: `translateX(${translateX}px)` }}
+          className="flex gap-10 flex-shrink-0"
+          style={{
+            animation: `cat-scroll ${desktopDuration}s linear infinite`,
+            animationPlayState: paused ? "paused" : "running",
+            width: `${desktopItemW * items.length}px`,
+          }}
         >
-          {extendedCategories.map((category, i) => (
-            <div key={`desktop-${i}`} className="flex-shrink-0">
-              <CategoryItem category={category} size="desktop" />
+          {items.map((cat, i) => (
+            <div
+              key={`d-${i}`}
+              className="flex-shrink-0 flex flex-col items-center gap-3 cursor-pointer group"
+              style={{ width: `${desktopItemW - 40}px` }}
+              onClick={() => { window.location.href = cat.path || "/shop"; }}
+            >
+              <div className="w-[180px] h-[180px] rounded-full p-[1.5px] bg-gradient-to-tr from-[#D4AF37] via-transparent to-[#D4AF37] shadow-[0_0_14px_rgba(212,175,55,0.1)] group-hover:shadow-[0_0_24px_rgba(212,175,55,0.3)] transition-shadow duration-500">
+                <div className="w-full h-full rounded-full overflow-hidden">
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+              </div>
+              <span className="text-white text-[11px] uppercase tracking-[0.15em] font-bold whitespace-nowrap font-display group-hover:text-primary transition-colors duration-300">
+                {cat.name}
+              </span>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -227,7 +220,7 @@ export default function Home() {
             <div className="w-12 h-[0.5px] bg-primary mx-auto mt-3" />
           </div>
 
-          <div className="relative h-[220px] md:h-[240px] flex items-center justify-center">
+          <div className="relative py-4">
             <CategoryCarousel />
           </div>
         </motion.div>
