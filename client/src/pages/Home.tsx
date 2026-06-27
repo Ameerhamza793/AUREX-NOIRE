@@ -199,14 +199,14 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section className="overflow-hidden relative bg-black py-10">
+      <section className="overflow-hidden relative bg-background pt-4 pb-2">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="text-center mb-8 px-4">
+          <div className="text-center mb-4 px-4">
             <h2 className="font-display text-xl md:text-2xl text-white uppercase tracking-[0.25em] font-bold">
               Shop By Category
             </h2>
@@ -217,7 +217,7 @@ export default function Home() {
       </section>
 
       {/* Featured Collection */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <section className="pt-5 pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
