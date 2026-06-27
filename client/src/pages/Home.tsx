@@ -55,7 +55,7 @@ function CategoryCarousel() {
                 overflow: "hidden",
                 flexShrink: 0,
               }}>
-                <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block" }} />
               </div>
               <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#fff", fontWeight: 700, textTransform: "uppercase", whiteSpace: "nowrap" }}>
                 {cat.name}
@@ -89,7 +89,7 @@ function CategoryCarousel() {
                   src={cat.image}
                   alt={cat.name}
                   className="group-hover:scale-110 transition-transform duration-500"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block" }}
                 />
               </div>
               <span
