@@ -1,118 +1,113 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-display: 'Cormorant Garamond', serif;
-  --font-body: 'Inter', sans-serif;
+  /* H S L format */
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Lato', sans-serif;
 
-  --background: 0 0% 4%;
-  --foreground: 0 0% 96%;
+  /* Luxury Dark Theme Palette */
+  --background: 0 0% 5%;          /* Very dark gray, almost black */
+  --foreground: 0 0% 95%;         /* Off-white text */
 
-  --card: 0 0% 8%;
-  --card-foreground: 0 0% 96%;
+  --card: 0 0% 10%;               /* Darker card background */
+  --card-foreground: 0 0% 95%;
 
   --popover: 0 0% 8%;
-  --popover-foreground: 0 0% 96%;
+  --popover-foreground: 0 0% 95%;
 
-  --primary: 42 52% 54%;
-  --primary-foreground: 0 0% 5%;
+  --primary: 46 65% 52%;          /* Gold #D4AF37 */
+  --primary-foreground: 0 0% 10%; /* Dark text on gold */
 
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 96%;
+  --secondary: 0 0% 15%;          /* Dark gray for secondary actions */
+  --secondary-foreground: 0 0% 98%;
 
-  --muted: 0 0% 16%;
-  --muted-foreground: 0 0% 53%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 60%;
 
-  --accent: 42 52% 54%;
-  --accent-foreground: 0 0% 5%;
+  --accent: 46 65% 52%;           /* Gold accent */
+  --accent-foreground: 0 0% 10%;
 
   --destructive: 0 62% 30%;
   --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 16%;
-  --input: 0 0% 16%;
-  --ring: 42 52% 54%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 46 65% 52%;
 
-  --radius: 0.5rem;
+  --radius: 0rem; /* Sharp corners for luxury feel */
 }
 
 @layer base {
   * {
-    @apply border-border box-border;
-  }
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-body);
-    overflow-x: hidden;
+    @apply bg-background text-foreground antialiased font-body;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
+    @apply font-display tracking-wide;
   }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: #2a2a2a; }
-::-webkit-scrollbar-thumb:hover { background: #C9A84C; }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
 
-/* Utilities */
 .gold-gradient {
-  background: linear-gradient(135deg, #C9A84C 0%, #E8C97A 50%, #C9A84C 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #F5DEB3 50%, #D4AF37 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
-.gold-text { color: #C9A84C; }
-
-.section-pad { padding: 80px 0; }
-@media (max-width: 768px) { .section-pad { padding: 48px 0; } }
-
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.no-scrollbar::-webkit-scrollbar { display: none; }
-
-.marquee-container { overflow: hidden; white-space: nowrap; }
-.marquee-track { display: inline-flex; animation: marquee 25s linear infinite; }
-.marquee-track:hover { animation-play-state: paused; }
-@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-.product-card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.product-card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.15);
+.hero-wave-divider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  transform: rotate(180deg);
+  z-index: 10;
 }
 
-.category-card {
-  transition: all 0.3s ease;
-  border: 1px solid #2a2a2a;
-}
-.category-card:hover {
-  border-color: #C9A84C;
-  box-shadow: 0 0 20px rgba(201,168,76,0.15);
+.hero-wave-divider svg {
+  position: relative;
+  display: block;
+  width: calc(100% + 1.3px);
+  height: 60px;
 }
 
-.brand-item {
-  transition: color 0.3s ease;
-  color: #444;
+.hero-wave-divider .shape-fill {
+  fill: #000000;
 }
-.brand-item:hover { color: #C9A84C; }
 
-.tab-btn {
-  transition: all 0.3s ease;
-  border-bottom: 2px solid transparent;
+.category-glow {
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+  transition: all 0.5s ease;
 }
-.tab-btn.active {
-  color: #C9A84C;
-  border-bottom-color: #C9A84C;
+
+.category-glow:hover {
+  box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
