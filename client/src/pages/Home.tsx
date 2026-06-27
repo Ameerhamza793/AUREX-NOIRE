@@ -38,25 +38,24 @@ function CategoryCarousel() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Mobile — 120px circles, 28px gap */}
-      <div className="flex md:hidden py-4">
+      {/* Mobile — 130px circles */}
+      <div className="flex md:hidden py-5">
         <div style={anim(12)}>
           {track.map((cat, i) => (
             <div
               key={`m-${i}`}
               className="flex-shrink-0 flex flex-col items-center cursor-pointer"
-              style={{ paddingLeft: 14, paddingRight: 14, gap: 10 }}
+              style={{ paddingLeft: 16, paddingRight: 16, gap: 10 }}
               onClick={() => { window.location.href = cat.path || "/shop"; }}
             >
               <div style={{
-                width: 120, height: 120, borderRadius: "50%", flexShrink: 0,
-                padding: 2,
-                background: "linear-gradient(135deg,#D4AF37 0%,#f5e09a 50%,#D4AF37 100%)",
-                boxShadow: "0 0 14px rgba(212,175,55,0.45)",
+                width: 130, height: 130, borderRadius: "50%",
+                border: "2.5px solid #D4AF37",
+                boxShadow: "0 0 14px rgba(212,175,55,0.5), 0 0 28px rgba(212,175,55,0.15)",
+                overflow: "hidden",
+                flexShrink: 0,
               }}>
-                <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
-                  <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                </div>
+                <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
               </div>
               <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#fff", fontWeight: 700, textTransform: "uppercase", whiteSpace: "nowrap" }}>
                 {cat.name}
@@ -66,33 +65,32 @@ function CategoryCarousel() {
         </div>
       </div>
 
-      {/* Desktop — 200px circles, 48px gap */}
+      {/* Desktop — 210px circles */}
       <div className="hidden md:flex py-6">
         <div style={anim(18)}>
           {track.map((cat, i) => (
             <div
               key={`d-${i}`}
               className="flex-shrink-0 flex flex-col items-center cursor-pointer group"
-              style={{ paddingLeft: 24, paddingRight: 24, gap: 14 }}
+              style={{ paddingLeft: 28, paddingRight: 28, gap: 14 }}
               onClick={() => { window.location.href = cat.path || "/shop"; }}
             >
               <div
                 className="transition-transform duration-500 group-hover:scale-105"
                 style={{
-                  width: 200, height: 200, borderRadius: "50%", flexShrink: 0,
-                  padding: 2.5,
-                  background: "linear-gradient(135deg,#D4AF37 0%,#f5e09a 50%,#D4AF37 100%)",
-                  boxShadow: "0 0 20px rgba(212,175,55,0.5), 0 0 40px rgba(212,175,55,0.18)",
+                  width: 210, height: 210, borderRadius: "50%",
+                  border: "3px solid #D4AF37",
+                  boxShadow: "0 0 20px rgba(212,175,55,0.55), 0 0 45px rgba(212,175,55,0.2)",
+                  overflow: "hidden",
+                  flexShrink: 0,
                 }}
               >
-                <div style={{ width: "100%", height: "100%", borderRadius: "50%", overflow: "hidden" }}>
-                  <img
-                    src={cat.image}
-                    alt={cat.name}
-                    className="group-hover:scale-110 transition-transform duration-500"
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  />
-                </div>
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="group-hover:scale-110 transition-transform duration-500"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
               </div>
               <span
                 className="group-hover:text-[#D4AF37] transition-colors duration-300"
@@ -201,16 +199,7 @@ export default function Home() {
       </section>
 
       {/* Categories Section */}
-      <section
-        className="overflow-hidden relative"
-        style={{
-          background: "linear-gradient(180deg, #061228 0%, #08172e 60%, #061228 100%)",
-          borderTop: "1px solid rgba(212,175,55,0.15)",
-          borderBottom: "1px solid rgba(212,175,55,0.15)",
-          paddingTop: 40,
-          paddingBottom: 48,
-        }}
-      >
+      <section className="overflow-hidden relative bg-black py-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
