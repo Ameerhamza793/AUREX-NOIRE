@@ -4,7 +4,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { useProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import { Link } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState, type CSSProperties } from "react";
 
@@ -106,6 +106,292 @@ function CategoryCarousel() {
   );
 }
 
+// Experience Time In Style Section
+function ExperienceSection() {
+  const images = [
+    "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1579953645585-c37367f694d7?q=80&w=500&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?q=80&w=500&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511632765486-a01980e01a18?q=80&w=500&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=500&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1523287016663-ba42f5b4b853?q=80&w=500&auto=format&fit=crop",
+  ];
+
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-16">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Experience Time <br />
+              <span className="text-[#D4AF37]">In Style</span>
+            </h2>
+            <p className="text-white/70 text-lg leading-relaxed mb-8">
+              Learn how to purchase, maintain, and make the most of your watches with our comprehensive guide. From choosing the perfect timepiece to keeping it in top condition, we've got you covered.
+            </p>
+            <button className="border-2 border-white/30 text-white px-8 py-3 rounded-full hover:bg-white/10 transition-all duration-300 text-sm font-semibold tracking-wide">
+              Show more
+            </button>
+          </div>
+
+          {/* Image Grid */}
+          <div className="grid grid-cols-3 gap-4">
+            {images.map((img, idx) => (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                viewport={{ once: true }}
+                className={`overflow-hidden rounded-lg ${
+                  idx === 0 ? "col-span-2 row-span-2" : ""
+                } ${idx === 1 ? "col-span-1 row-span-1" : ""} ${
+                  idx === 2 ? "col-span-1 row-span-1" : ""
+                }`}
+              >
+                <img
+                  src={img}
+                  alt={`Experience ${idx + 1}`}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 cursor-pointer"
+                  style={{
+                    minHeight: idx === 0 ? "300px" : "140px",
+                  }}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottom text */}
+        <p className="text-white/60 text-sm">
+          Learn how to purchase, maintain, and make the most of your watches with our comprehensive guide.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// Why Our Watch Section
+function WhyOurWatchSection() {
+  const features = [
+    {
+      title: "Movement",
+      description: "The most important factor for a watch. Movement includes quartz and cost.",
+    },
+    {
+      title: "Case Material",
+      description: "Watches can have cases made from a variety of materials, including stainless steel, titanium, copper, nickel, and alloy.",
+    },
+    {
+      title: "Features",
+      description: "Modern watches often display the date, day, moon, and also some extra features.",
+    },
+    {
+      title: "Quality",
+      description: "A watch will have a smooth and distinct movement, high-quality dial and glass, and a quality finish.",
+    },
+    {
+      title: "Water Resistance",
+      description: "A watch with 30-meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      title: "Face Material",
+      description: "The most important factor for a watch. Movement determines its functions and cost.",
+    },
+  ];
+
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Why Our <span className="text-[#D4AF37]">Watch!</span>
+          </h2>
+          <p className="text-white/60 text-lg">
+            Our watches are meticulously crafted using the finest materials, resulting in timepieces of unparalleled quality and style.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {features.map((feature, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white/5 border border-white/10 rounded-lg p-8 hover:bg-white/10 transition-all duration-300"
+            >
+              <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+              <p className="text-white/70 text-sm leading-relaxed mb-6">{feature.description}</p>
+              <div className="flex items-center text-[#D4AF37] cursor-pointer hover:translate-x-1 transition-transform">
+                <span className="text-sm font-semibold">Read more</span>
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Happy Customers Section
+function HappyCustomersSection() {
+  const customers = [
+    {
+      name: "Rishi Spudi",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Rishi",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      name: "Joe Biden",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Joe",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      name: "Donald Trump",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Donald",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      name: "Dev Patel",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dev",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      name: "Evan Bisbtic",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Evan",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+    {
+      name: "Barak Obama",
+      role: "Customer",
+      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Barak",
+      review: "A watch with a 30 meter water resistance rating should be fine for most activities, but you shouldn't dive with it.",
+    },
+  ];
+
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Our Happy <span className="text-[#D4AF37]">Customers</span>
+          </h2>
+          <p className="text-white/60 text-lg">
+            For over a decade, we have been committed to delivering exceptional products that exceed customer expectations.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {customers.map((customer, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white/5 border border-white/10 rounded-lg p-8 hover:bg-white/10 transition-all duration-300"
+            >
+              <div className="flex items-center gap-4 mb-6">
+                <img
+                  src={customer.image}
+                  alt={customer.name}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div>
+                  <h3 className="text-white font-bold">{customer.name}</h3>
+                  <p className="text-white/60 text-sm">{customer.role}</p>
+                </div>
+              </div>
+              <p className="text-white/70 text-sm leading-relaxed">{customer.review}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Newsletter Section
+function NewsletterSection() {
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = () => {
+    if (email) {
+      console.log("Newsletter subscription:", email);
+      setEmail("");
+    }
+  };
+
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black relative overflow-hidden">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Don't Miss Any <span className="text-[#D4AF37]">Updates</span>
+            </h2>
+            <p className="text-white/70 text-lg leading-relaxed">
+              Watches can have cases made from a variety of materials, including stainless steel, titanium, copper, nickel, and alloy.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-3">
+              <input
+                type="email"
+                placeholder="Enter your mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1 bg-transparent border border-white/30 rounded-full px-6 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#D4AF37] transition-colors"
+              />
+              <button
+                onClick={handleSubscribe}
+                className="bg-[#D4AF37] text-black px-8 py-3 rounded-full font-bold hover:bg-[#E8C547] transition-all duration-300 text-sm tracking-wide"
+              >
+                Subscribe
+              </button>
+            </div>
+          </div>
+
+          {/* Apple Watch Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="flex justify-center lg:justify-end"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=500&auto=format&fit=crop"
+              alt="Featured Watch"
+              className="w-full max-w-sm object-contain"
+            />
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Decorative Circle */}
+      <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl" />
+    </section>
+  );
+}
+
 export default function Home() {
   const { data: products, isLoading } = useProducts();
 
@@ -193,7 +479,7 @@ export default function Home() {
         {/* Wave Divider */}
         <div className="hero-wave-divider">
           <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#000"></path>
           </svg>
         </div>
       </section>
@@ -241,6 +527,18 @@ export default function Home() {
           </div>
         )}
       </section>
+
+      {/* Experience Time In Style Section */}
+      <ExperienceSection />
+
+      {/* Why Our Watch Section */}
+      <WhyOurWatchSection />
+
+      {/* Happy Customers Section */}
+      <HappyCustomersSection />
+
+      {/* Newsletter Section */}
+      <NewsletterSection />
 
       <Footer />
     </div>
